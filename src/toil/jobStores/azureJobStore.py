@@ -263,15 +263,23 @@ class AzureJobStore(AbstractJobStore):
                                                      encrypted=str(encrypted)))
         self.statsFileIDs.insert_entity(entity={'RowKey': jobStoreFileID})
 
-    def readStatsAndLogging(self, statsAndLoggingCallbackFn):
+    def readStatsAndLogging(self, statsAndLoggingCallbackFn, readAll=False):
         numStatsFiles = 0
         for entity in self.statsFileIDs.query_entities():
             jobStoreFileID = entity.RowKey
-            with self._downloadStream(jobStoreFileID, self.statsFiles) as fd:
-                statsAndLoggingCallbackFn(fd)
-            self.statsFiles.delete_blob(blob_name=jobStoreFileID)
-            self.statsFileIDs.delete_entity(row_key=jobStoreFileID)
-            numStatsFiles += 1
+            hasNotBeenRead = False if len(jobStoreFileID) > len(str(uuid.uuid4())) else True
+            if hasNotBeenRead:
+                with self._downloadStream(jobStoreFileID, self.statsFiles) as fd:
+                    statsAndLoggingCallbackFn(fd)
+                if hasNotBeenRead:
+                    self.statsFileIDs.insert_entity(entity={'RowKey': jobStoreFileID+'_old'}) # mark this entity as read
+                    self.statsFileIDs.delete_entity(row_key=jobStoreFileID)
+                numStatsFiles += 1
+            elif readAll:
+                # strip the '_old' suffix to get true blobstore id.
+                with self._downloadStream(jobStoreFileID[:-4], self.statsFiles) as fd:
+                    statsAndLoggingCallbackFn(fd)
+                numStatsFiles += 1
         return numStatsFiles
 
     _azureTimeFormat = "%Y-%m-%dT%H:%M:%SZ"

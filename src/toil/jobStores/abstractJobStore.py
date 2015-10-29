@@ -419,14 +419,14 @@ class AbstractJobStore(object):
         raise NotImplementedError()
 
     @abstractmethod
-    def readStatsAndLogging(self, statsAndLoggingCallBackFn):
+    def readStatsAndLogging(self, statsAndLoggingCallBackFn, readAll=False):
         """
         Reads stats/logging strings accumulated by "writeStatsAndLogging" function. 
         For each stats/logging file calls the statsAndLoggingCallBackFn with 
         an open, readable file-handle that can be used to parse the stats.
         Returns the number of stat/logging strings processed. 
-        Stats/logging files are only read once and are removed from the 
-        file store after being written to the given file handle.
+        Stats/logging files are only read once unless the readAll parameter is set
+        to True, in which case all existing stats/logging files will be reread.
         """
         raise NotImplementedError()
 

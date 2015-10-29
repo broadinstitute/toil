@@ -164,5 +164,6 @@ class UtilsTest(ToilTest):
 
     def testUnicodeSupport(self):
         encodeTest()
+
 if __name__ == '__main__':
     unittest.main()
