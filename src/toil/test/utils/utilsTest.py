@@ -25,6 +25,7 @@ from toil.lib.bioio import getTempFile
 from toil import toilPackageDirPath, resolveEntryPoint
 from toil.test import ToilTest
 from toil.test.sort.sortTest import makeFileToSort
+from toil.test.src.encodingTest import main as encodeTest
 import toil.test.sort.sort
 
 
@@ -159,4 +160,9 @@ class UtilsTest(ToilTest):
         # Check the file is properly sorted
         with open(self.tempFile, 'r') as fileHandle:
             l2 = fileHandle.readlines()
-        self.assertEquals(self.correctSort, l2)
+            self.assertEquals(self.correctSort, l2)
+
+    def testUnicodeSupport(self):
+        encodeTest()
+if __name__ == '__main__':
+    unittest.main()
